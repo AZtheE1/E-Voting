@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vote - E-Voting</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="app-header">
+            <div class="app-title">
+                <img src="https://www.ecs.gov.bd/front/assets/images/logo.png" alt="logo" />
+                <h3>E-Voting System</h3>
+            </div>
+            <div class="app-nav">
+                <a th:href="@{/}" class="btn btn-link">Home</a>
+            </div>
+        </div>
+
+        <div class="card" style="max-width: 800px; margin: 0 auto;">
+            <div class="card-header">
+                Voting Booth
+            </div>
+            <div class="card-body">
+
+                <!-- Error Message -->
+                <div th:if="${errorMessage}" class="alert alert-danger">
+                    <strong th:text="${errorMessage}">Error</strong>
+                </div>
+
+                <!-- Step 1: Voter Identification -->
+                <div th:if="${showVoterInput}" class="text-center" style="padding: 2rem 0;">
+                    <h2 style="margin-bottom: 1rem;">Voter Identification</h2>
+                    <p class="text-muted" style="margin-bottom: 2rem;">Please enter your Voter ID to proceed.</p>
+
+                    <form method="get" th:action="@{/vote}" style="max-width: 400px; margin: 0 auto;">
+                        <input type="hidden" name="electionId" th:value="${electionId}" />
+                        <div class="mb-3">
+                            <input type="text" class="form-control" name="voterIdInput" placeholder="Enter NID Number"
+                                required style="text-align: center; font-size: 1.2rem; margin-bottom: 1rem;">
+                            <input type="password" class="form-control" name="password" placeholder="Enter Password"
+                                required style="text-align: center; font-size: 1.2rem;">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Verify Identity</button>
+                    </form>
+                </div>
+
+                <!-- Step 2: Voting Interface -->
+                <div th:if="${!showVoterInput}">
+                    <div class="alert alert-info"
+                        style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>Voter:</strong> <span th:text="${sessionVoterName}">Name</span>
+                            (<span th:text="${sessionVoterNid}">NID</span>)
+                        </div>
+                        <span class="badge bg-light text-dark" th:text="${sessionVoterGender}">Gender</span>
+                    </div>
+
+                    <div th:if="${hasVoted}" class="text-center" style="padding: 3rem 0;">
+                        <div style="font-size: 4rem; color: var(--success); margin-bottom: 1rem;">&check;</div>
+                        <h2>You have already voted!</h2>
+                        <p class="text-muted">Thank you for participating in this election.</p>
+
+                        <div th:if="${myVote}" class="card"
+                            style="max-width: 400px; margin: 2rem auto; background: #f8fafc;">
+                            <div class="card-body">
+                                <p class="text-muted" style="margin-bottom: 0.5rem;">You voted for:</p>
+                                <h3 th:text="${myVote.candidate_name}" style="color: var(--primary);">Candidate Name
+                                </h3>
+                                <p th:text="${myVote.party_name}" style="margin: 0; font-weight: 500;">Party Name</p>
+                            </div>
+                        </div>
+
+                        <a th:href="@{/results(electionId=${electionId})}" class="btn btn-outline-secondary">View Live
+                            Results</a>
+                    </div>
+
+                    <div th:if="${!hasVoted}">
+                        <h3 class="text-center" style="margin-bottom: 2rem;">Select Your Candidate</h3>
+
+                        <form method="post" th:action="@{/vote}">
+                            <input type="hidden" name="electionId" th:value="${electionId}" />
+                            <input type="hidden" name="voterId" th:value="${sessionVoterId}" />
+
+                            <div class="d-grid gap-2"
+                                style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                                <label th:each="candidate : ${candidates}" class="card"
+                                    style="cursor: pointer; border: 2px solid transparent; transition: all 0.2s;">
+                                    <input type="radio" name="candidateId" th:value="${candidate.candidate_id}" required
+                                        style="position: absolute; opacity: 0;">
+                                    <div class="card-body text-center">
+                                        <div
+                                            style="width: 60px; height: 60px; background: #e2e8f0; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; color: var(--text-muted);">
+                                            <span th:text="${#strings.substring(candidate.full_name,0,1)}">A</span>
+                                        </div>
+                                        <h4 th:text="${candidate.full_name}" style="margin-bottom: 0.5rem;">Candidate
+                                            Name</h4>
+                                        <p th:text="${candidate.party_name}" class="text-muted" style="margin: 0;">Party
+                                            Name</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <style>
+                                input[type="radio"]:checked+.card-body {
+                                    background-color: #eff6ff;
+                                    border-radius: var(--radius);
+                                }
+
+                                label.card:has(input:checked) {
+                                    border-color: var(--primary);
+                                    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+                                }
+                            </style>
+
+                            <div class="text-center" style="margin-top: 2rem;">
+                                <button type="submit" class="btn btn-primary btn-lg" style="min-width: 200px;">Confirm
+                                    Vote</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

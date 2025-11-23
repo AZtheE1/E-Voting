@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login - E-Voting</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div class="login-container">
+    <div class="login-hero"></div>
+    
+    <div class="login-form-wrapper">
+        <div class="app-title" style="margin-bottom: 2rem; justify-content: center;">
+            <img src="https://www.ecs.gov.bd/front/assets/images/logo.png" alt="logo"/>
+            <h3 style="font-size: 1.5rem;">E-Voting System</h3>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 style="margin: 0; font-size: 1.25rem; text-align: center;">Welcome Back</h2>
+                <p class="text-muted text-center" style="margin: 0.5rem 0 0; font-weight: normal;">Please sign in to continue</p>
+            </div>
+            <div class="card-body">
+                <!-- Error Messages -->
+                <div th:if="${param.error}" class="alert alert-danger">
+                    <strong>Login Failed:</strong>
+                    <span th:if="${param.error == 'missing_nid'}">Please enter your NID.</span>
+                    <span th:if="${param.error == 'missing_password'}">Please enter your password.</span>
+                    <span th:if="${param.error == 'voter_not_found'}">No voter found with this NID.</span>
+                    <span th:if="${param.error == 'invalid_admin'}">Invalid admin credentials.</span>
+                    <span th:if="${param.error == 'system_error'}">System error. Try again later.</span>
+                    <span th:if="${param.error == 'invalid_request'}">Invalid login request.</span>
+                </div>
+
+                <div th:if="${param.logout}" class="alert alert-info">
+                    You have been logged out successfully.
+                </div>
+
+                <form method="post" th:action="@{/login}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">NID Number / Username</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Enter your NID" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Login As</label>
+                        <div class="d-grid gap-2" style="grid-template-columns: 1fr 1fr;">
+                            <label class="btn btn-outline-secondary" style="justify-content: center;">
+                                <input type="radio" name="loginType" value="voter" checked style="margin-right: 8px;"> Voter
+                            </label>
+                            <label class="btn btn-outline-secondary" style="justify-content: center;">
+                                <input type="radio" name="loginType" value="admin" style="margin-right: 8px;"> Admin
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">Sign In</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="site-footer">
+            &copy; 2025 E-Voting System. Secure & Transparent.
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

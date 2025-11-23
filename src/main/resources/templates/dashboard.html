@@ -1,0 +1,73 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard - E-Voting</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="app-header">
+            <div class="app-title">
+                <img src="https://www.ecs.gov.bd/front/assets/images/logo.png" alt="logo" />
+                <h3>E-Voting System</h3>
+            </div>
+            <div class="app-nav">
+                <a th:href="@{/}" class="active">Home</a>
+                <a th:href="@{/results}">Results</a>
+                <a th:href="@{/admin}">Admin</a>
+                <form th:action="@{/logout}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-outline-secondary"
+                        style="padding: 0.5rem 1rem; font-size: 0.9rem;">Logout</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="dashboard-banner">
+            <div>
+                <h1>Welcome to E-Voting</h1>
+                <p style="font-size: 1.1rem; opacity: 0.9;">Secure, Transparent, and Efficient Voting Platform</p>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+            <div class="card">
+                <div class="card-header">Cast Your Vote</div>
+                <div class="card-body">
+                    <p class="text-muted">Participate in the ongoing election. Your vote matters.</p>
+                    <a th:href="@{/vote}" class="btn btn-primary">Go to Voting Booth &rarr;</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Live Results</div>
+                <div class="card-body">
+                    <p class="text-muted">View real-time updates and election statistics.</p>
+                    <a th:href="@{/results}" class="btn btn-outline-secondary">View Results</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Information</div>
+                <div class="card-body">
+                    <p class="text-muted">Check voter guidelines and election schedule.</p>
+                    <button class="btn btn-outline-secondary" disabled>Coming Soon</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="site-footer">
+            &copy; 2025 E-Voting System. All rights reserved.
+        </div>
+    </div>
+
+</body>
+
+</html>

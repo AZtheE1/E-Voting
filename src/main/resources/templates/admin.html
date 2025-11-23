@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin - E-Voting</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="app-header">
+            <div class="app-title">
+                <img src="https://www.ecs.gov.bd/front/assets/images/logo.png" alt="logo" />
+                <h3>E-Voting System</h3>
+            </div>
+            <div class="app-nav">
+                <a th:href="@{/}" class="btn btn-link">Home</a>
+                <a th:href="@{/admin}" class="active">Admin</a>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">
+                Administration Panel
+            </div>
+            <div class="card-body">
+
+                <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+
+                    <!-- Add Election -->
+                    <div>
+                        <h3 style="margin-bottom: 1rem;">Create Election</h3>
+                        <form method="post" th:action="@{/admin/addElection}" class="card"
+                            style="padding: 1.5rem; box-shadow: none; background: #f8fafc;">
+                            <div class="mb-3">
+                                <label class="form-label">Election Title</label>
+                                <input type="text" name="title" class="form-control"
+                                    placeholder="e.g. National Election 2025" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create Election</button>
+                        </form>
+
+                        <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Existing Elections</h3>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="election : ${elections}">
+                                        <td th:text="${election.election_id}">1</td>
+                                        <td th:text="${election.title}">Title</td>
+                                        <td>
+                                            <span class="badge bg-light text-dark" style="border: 1px solid #e2e8f0;"
+                                                th:text="${election.status}">upcoming</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Add Candidate -->
+                    <div>
+                        <h3 style="margin-bottom: 1rem;">Add Candidate</h3>
+                        <form method="post" th:action="@{/admin/addCandidate}" class="card"
+                            style="padding: 1.5rem; box-shadow: none; background: #f8fafc;">
+                            <div class="mb-3">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" name="fullName" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Party Name</label>
+                                <input type="text" name="partyName" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Constituency ID</label>
+                                <input type="number" name="constituencyId" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Election ID</label>
+                                <input type="number" name="electionId" class="form-control" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Candidate</button>
+                        </form>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
