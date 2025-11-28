@@ -1,6 +1,8 @@
 CREATE TABLE IF NOT EXISTS election (
     election_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
+    start_date DATE,
+    end_date DATE,
     status VARCHAR(50) DEFAULT 'upcoming'
 );
 
@@ -15,6 +17,7 @@ CREATE TABLE IF NOT EXISTS candidate (
     party_name VARCHAR(255) NOT NULL,
     constituency_id BIGINT,
     election_id BIGINT,
+    symbol VARCHAR(255),
     FOREIGN KEY (election_id) REFERENCES election(election_id)
 );
 

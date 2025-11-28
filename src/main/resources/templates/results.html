@@ -4,99 +4,95 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Results - E-Voting</title>
+    <title>Election Results - E-Voting</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .progress {
+            height: 1.5rem;
+            border-radius: 0.75rem;
+            background-color: #f3f4f6;
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar {
+            background-color: var(--primary-color);
+            border-radius: 0.75rem;
+            line-height: 1.5rem;
+            font-weight: 600;
+            padding-left: 0.5rem;
+            text-align: left;
+        }
+    </style>
 </head>
 
 <body>
 
-    <div class="container">
-        <div class="app-header">
-            <div class="app-title">
-                <img src="https://www.ecs.gov.bd/front/assets/images/logo.png" alt="logo" />
-                <h3>E-Voting System</h3>
-            </div>
-            <div class="app-nav">
-                <a th:href="@{/}" class="btn btn-link">Home</a>
-                <a th:href="@{/results}" class="active">Results</a>
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a class="navbar-brand" th:href="@{/}">
+                <img src="https://www.ecs.gov.bd/front/assets/images/logo.png" alt="logo"
+                    style="height: 40px; margin-right: 10px;">
+                E-Voting System
+            </a>
+            <div class="navbar-nav">
+                <span class="nav-item" style="margin-right: 1rem;">Welcome, <span
+                        th:text="${voterName}">Voter</span></span>
+                <form th:action="@{/logout}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
+                </form>
             </div>
         </div>
+    </nav>
 
-        <div class="card mb-3">
-            <div class="card-header">
-                Election Results
-            </div>
-            <div class="card-body">
+    <div class="container main-content">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold">Live Election Results</h1>
+            <p class="lead text-muted">Real-time vote count for the election.</p>
+        </div>
 
-                <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div th:each="result : ${votesPerCandidate}" class="result-card">
+                    <div class="d-flex justify-content-between align-items-end">
+                        <div>
+                            <h4 class="mb-1" th:text="${result.candidate_name}">Candidate Name</h4>
+                            <small class="text-muted" th:text="${result.party_name}">Party</small>
+                        </div>
+                        <div class="text-end">
+                            <h3 class="mb-0 fw-bold" th:text="${result.total_votes}">0</h3>
+                            <small class="text-muted">Votes</small>
+                        </div>
+                    </div>
 
-                <h3 style="margin-bottom: 1.5rem;">Overall Results</h3>
-                <div class="table-responsive" style="overflow-x: auto;">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Candidate</th>
-                                <th>Party</th>
-                                <th class="text-center">Total Votes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="row : ${votesPerCandidate}">
-                                <td style="font-weight: 500;" th:text="${row.candidate_name}">Candidate</td>
-                                <td class="text-muted" th:text="${row.party_name}">Party</td>
-                                <td class="text-center">
-                                    <span class="badge bg-primary"
-                                        style="font-size: 1rem; padding: 0.25rem 0.75rem; background: #eff6ff; color: var(--primary); border-radius: 1rem;"
-                                        th:text="${row.total_votes}">0</span>
-                                </td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(votesPerCandidate)}">
-                                <td colspan="3" class="text-center text-muted" style="padding: 2rem;">No votes cast yet.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div style="margin-top: 3rem;">
-                    <h3 style="margin-bottom: 1.5rem;">Constituency Breakdown</h3>
-
-                    <form method="get" th:action="@{/results}"
-                        style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; background: #f8fafc; padding: 1rem; border-radius: var(--radius);">
-                        <input type="hidden" name="electionId" th:value="${electionId}" />
-                        <label style="font-weight: 500;">Filter by Constituency ID:</label>
-                        <input type="number" name="constituencyId" th:value="${constituencyId}" class="form-control"
-                            style="width: 100px;">
-                        <button type="submit" class="btn btn-outline-secondary">Filter</button>
-                    </form>
-
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Candidate</th>
-                                    <th class="text-center">Votes in Constituency</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="row : ${constituencyResults}">
-                                    <td th:text="${row.candidate_name}">Name</td>
-                                    <td class="text-center" th:text="${row.total_votes}">0</td>
-                                </tr>
-                                <tr th:if="${#lists.isEmpty(constituencyResults)}">
-                                    <td colspan="2" class="text-center text-muted">No results for this constituency.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <!-- Calculate percentage for progress bar (mock logic for now, ideally calculated in backend) -->
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar"
+                            th:style="'width: ' + (${result.total_votes} * 10) + '%'"
+                            th:aria-valuenow="${result.total_votes}" aria-valuemin="0" aria-valuemax="100">
+                        </div>
                     </div>
                 </div>
 
+                <div class="text-center mt-4">
+                    <a th:href="@{/elections}" class="btn btn-outline-primary">Back to Elections</a>
+                </div>
             </div>
         </div>
+    </div>
+
+    <div class="site-footer">
+        &copy; 2025 E-Voting System. Secure & Transparent.
     </div>
 
 </body>

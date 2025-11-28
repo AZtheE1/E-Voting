@@ -36,6 +36,11 @@ public class ReportingUserDetailsService implements UserDetailsService {
 
         // Then check voter by NID
         Map<String, Object> voter = repository.findVoterByNid(username);
+        if (voter == null) {
+            // Fallback: check by Voter ID (e.g. "1", "2")
+            voter = repository.findVoterByIdString(username);
+        }
+
         if (voter != null) {
             String pw = (String) voter.get("password");
             Collection<GrantedAuthority> authorities = new ArrayList<>();

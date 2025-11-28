@@ -25,9 +25,8 @@ public class MigrationRunner {
         try {
             // 1) Add password column to voter if missing
             Integer cntVoterPassword = jdbc.queryForObject(
-                    "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'voter' AND COLUMN_NAME = 'password'",
-                    Integer.class
-            );
+                    "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = 'PUBLIC' AND TABLE_NAME = 'VOTER' AND COLUMN_NAME = 'PASSWORD'",
+                    Integer.class);
             if (cntVoterPassword == null || cntVoterPassword == 0) {
                 logger.info("Adding password column to voter table");
                 jdbc.execute("ALTER TABLE voter ADD COLUMN password VARCHAR(255)");
@@ -35,15 +34,15 @@ public class MigrationRunner {
                 logger.debug("voter.password column already exists");
             }
         } catch (Exception e) {
-            logger.warn("Could not add voter.password column (it may not be supported or table missing): {}", e.getMessage());
+            logger.warn("Could not add voter.password column (it may not be supported or table missing): {}",
+                    e.getMessage());
         }
 
         try {
             // 2) Add password column to admin if missing
             Integer cntAdminPassword = jdbc.queryForObject(
-                    "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'admin' AND COLUMN_NAME = 'password'",
-                    Integer.class
-            );
+                    "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = 'PUBLIC' AND TABLE_NAME = 'ADMIN' AND COLUMN_NAME = 'PASSWORD'",
+                    Integer.class);
             if (cntAdminPassword == null || cntAdminPassword == 0) {
                 logger.info("Adding password column to admin table");
                 jdbc.execute("ALTER TABLE admin ADD COLUMN password VARCHAR(255)");
@@ -51,7 +50,8 @@ public class MigrationRunner {
                 logger.debug("admin.password column already exists");
             }
         } catch (Exception e) {
-            logger.warn("Could not add admin.password column (it may not be supported or table missing): {}", e.getMessage());
+            logger.warn("Could not add admin.password column (it may not be supported or table missing): {}",
+                    e.getMessage());
         }
 
         try {

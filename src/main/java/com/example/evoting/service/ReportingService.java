@@ -69,6 +69,10 @@ public class ReportingService {
         return repository.findVoterById(voterId);
     }
 
+    public Map<String, Object> findVoterByIdString(String idStr) {
+        return repository.findVoterByIdString(idStr);
+    }
+
     public void addCandidate(String fullName, String partyName, long constituencyId, long electionId) {
         int rows = repository.insertCandidate(fullName, partyName, constituencyId, electionId);
         if (rows != 1)
@@ -79,6 +83,23 @@ public class ReportingService {
         int rows = repository.insertElection(electionName);
         if (rows != 1)
             throw new IllegalStateException("Failed to insert election");
+    }
+
+    /**
+     * Authenticates a voter by NID and Password, then returns their details.
+     * Also filters candidates based on the voter's constituency.
+     */
+    /**
+     * Finds candidates for a specific election and constituency.
+     */
+    public List<Map<String, Object>> findCandidatesByElectionAndConstituency(long electionId, long constituencyId) {
+        List<Map<String, Object>> allCandidates = loadCandidates(electionId);
+        return allCandidates.stream()
+                .filter(c -> {
+                    Object cId = c.get("constituency_id");
+                    return cId != null && ((Number) cId).longValue() == constituencyId;
+                })
+                .toList();
     }
 
     /**
@@ -113,14 +134,7 @@ public class ReportingService {
         if (alreadyVoted) {
             sessionData.put("myVote", findVoteForVoter(electionId, voterId));
         } else {
-            List<Map<String, Object>> allCandidates = loadCandidates(electionId);
-            List<Map<String, Object>> constituencyCandidates = allCandidates.stream()
-                    .filter(c -> {
-                        Object cId = c.get("constituency_id");
-                        return cId != null && ((Number) cId).longValue() == constituencyId;
-                    })
-                    .toList();
-            sessionData.put("candidates", constituencyCandidates);
+            sessionData.put("candidates", findCandidatesByElectionAndConstituency(electionId, constituencyId));
         }
 
         return sessionData;
