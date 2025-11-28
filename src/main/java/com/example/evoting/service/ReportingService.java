@@ -73,14 +73,41 @@ public class ReportingService {
         return repository.findVoterByIdString(idStr);
     }
 
-    public void addCandidate(String fullName, String partyName, long constituencyId, long electionId) {
-        int rows = repository.insertCandidate(fullName, partyName, constituencyId, electionId);
+    public void addCandidate(String fullName, String partyName, long constituencyId, long electionId, String symbol) {
+        int rows = repository.insertCandidate(fullName, partyName, constituencyId, electionId, symbol);
         if (rows != 1)
             throw new IllegalStateException("Failed to insert candidate");
     }
 
-    public void addElection(String electionName) {
-        int rows = repository.insertElection(electionName);
+    public void deleteCandidate(long candidateId) {
+        repository.deleteVotesByCandidateId(candidateId);
+        repository.deleteCandidate(candidateId);
+    }
+
+    public List<Map<String, Object>> getAllCandidates() {
+        return repository.findAllCandidates();
+    }
+
+    public void addElection(String electionName, String startDate, String endDate) {
+        String status = "upcoming";
+        try {
+            java.time.LocalDate start = java.time.LocalDate.parse(startDate);
+            java.time.LocalDate end = java.time.LocalDate.parse(endDate);
+            java.time.LocalDate now = java.time.LocalDate.now();
+
+            if (now.isAfter(end)) {
+                status = "completed";
+            } else if (now.isEqual(start) || (now.isAfter(start) && now.isBefore(end)) || now.isEqual(end)) {
+                status = "active";
+            } else {
+                status = "upcoming";
+            }
+        } catch (Exception e) {
+            // Fallback status if parsing fails
+            status = "upcoming";
+        }
+
+        int rows = repository.insertElection(electionName, startDate, endDate, status);
         if (rows != 1)
             throw new IllegalStateException("Failed to insert election");
     }
@@ -138,5 +165,12 @@ public class ReportingService {
         }
 
         return sessionData;
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void deleteElection(long electionId) {
+        repository.deleteVotesByElectionId(electionId);
+        repository.deleteCandidatesByElectionId(electionId);
+        repository.deleteElection(electionId);
     }
 }

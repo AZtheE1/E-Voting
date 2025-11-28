@@ -4,105 +4,271 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Admin - E-Voting</title>
+    <title>Admin Dashboard - E-Voting</title>
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
     <link rel="stylesheet" th:href="@{/css/styles.css}">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .navbar {
+            background-color: #ffffff;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-top-left-radius: 0.75rem !important;
+            border-top-right-radius: 0.75rem !important;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+
+        .table th {
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-active {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-upcoming {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+    </style>
 </head>
 
 <body>
 
-    <div class="container">
-        <div class="app-header">
-            <div class="app-title">
-                <img src="https://www.ecs.gov.bd/front/assets/images/logo.png" alt="logo" />
-                <h3>E-Voting System</h3>
-            </div>
-            <div class="app-nav">
-                <a th:href="@{/}" class="btn btn-link">Home</a>
-                <a th:href="@{/admin}" class="active">Admin</a>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+                <img src="https://www.ecs.gov.bd/front/assets/images/logo.png" alt="logo" height="40" class="me-2">
+                E-Voting Admin
+            </a>
+            <div class="ms-auto">
+                <a th:href="@{/}" class="btn btn-outline-secondary btn-sm">Back to Home</a>
             </div>
         </div>
+    </nav>
 
-        <div class="card mb-3">
-            <div class="card-header">
-                Administration Panel
-            </div>
-            <div class="card-body">
+    <div class="container py-5">
 
-                <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+        <!-- Error Message -->
+        <div th:if="${errorMessage}" class="alert alert-danger mb-4 shadow-sm" role="alert" th:text="${errorMessage}">
+        </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+        <div class="row g-4">
 
-                    <!-- Add Election -->
-                    <div>
-                        <h3 style="margin-bottom: 1rem;">Create Election</h3>
-                        <form method="post" th:action="@{/admin/addElection}" class="card"
-                            style="padding: 1.5rem; box-shadow: none; background: #f8fafc;">
-                            <div class="mb-3">
-                                <label class="form-label">Election Title</label>
-                                <input type="text" name="title" class="form-control"
-                                    placeholder="e.g. National Election 2025" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Create Election</button>
-                        </form>
+            <!-- Left Column: Elections -->
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Elections Management</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Create Election Form -->
+                        <div class="bg-light p-3 rounded mb-4 border">
+                            <h6 class="mb-3 fw-bold text-secondary">Create New Election</h6>
+                            <form method="post" action="/admin/saveElection" class="row g-2">
+                                <div class="col-12">
+                                    <input type="text" name="title" class="form-control"
+                                        placeholder="Election Title (e.g. 2025 General)" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-muted">Start Date</label>
+                                    <input type="date" name="startDate" class="form-control" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-muted">End Date</label>
+                                    <input type="date" name="endDate" class="form-control" required>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary w-100">Save Election</button>
+                                </div>
+                            </form>
+                        </div>
 
-                        <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Existing Elections</h3>
+                        <!-- Elections Table -->
+                        <h6 class="mb-3 fw-bold text-secondary">Existing Elections</h6>
                         <div class="table-responsive">
-                            <table class="table">
-                                <thead>
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
                                     <tr>
                                         <th>ID</th>
                                         <th>Title</th>
                                         <th>Status</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="election : ${elections}">
                                         <td th:text="${election.election_id}">1</td>
-                                        <td th:text="${election.title}">Title</td>
+                                        <td th:text="${election.title}" class="fw-medium">Title</td>
                                         <td>
-                                            <span class="badge bg-light text-dark" style="border: 1px solid #e2e8f0;"
-                                                th:text="${election.status}">upcoming</span>
+                                            <span class="badge badge-active px-2 py-1 rounded"
+                                                th:if="${election.status == 'active'}">Active</span>
+                                            <span class="badge badge-upcoming px-2 py-1 rounded"
+                                                th:unless="${election.status == 'active'}"
+                                                th:text="${election.status}">Upcoming</span>
                                         </td>
+                                        <td>
+                                            <a th:href="@{/results/{id}(id=${election.election_id})}"
+                                                class="btn btn-sm btn-outline-primary">Results</a>
+                                            <form method="post" th:action="@{/admin/deleteElection}"
+                                                style="display:inline; margin-left: 5px;">
+                                                <input type="hidden" name="electionId"
+                                                    th:value="${election.election_id}" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('Delete this election? This will remove all associated votes and candidates.')">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(elections)}">
+                                        <td colspan="4" class="text-center text-muted py-3">No elections found.</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-
-                    <!-- Add Candidate -->
-                    <div>
-                        <h3 style="margin-bottom: 1rem;">Add Candidate</h3>
-                        <form method="post" th:action="@{/admin/addCandidate}" class="card"
-                            style="padding: 1.5rem; box-shadow: none; background: #f8fafc;">
-                            <div class="mb-3">
-                                <label class="form-label">Full Name</label>
-                                <input type="text" name="fullName" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Party Name</label>
-                                <input type="text" name="partyName" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Constituency ID</label>
-                                <input type="number" name="constituencyId" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Election ID</label>
-                                <input type="number" name="electionId" class="form-control" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Add Candidate</button>
-                        </form>
-                    </div>
-
                 </div>
+            </div>
 
+            <!-- Right Column: Candidates -->
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <span>Candidates Management</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Add Candidate Form -->
+                        <div class="bg-light p-3 rounded mb-4 border">
+                            <h6 class="mb-3 fw-bold text-secondary">Add New Candidate</h6>
+                            <form method="post" th:action="@{/admin/addCandidate}" enctype="multipart/form-data">
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-6">
+                                        <input type="text" name="fullName" class="form-control form-control-sm"
+                                            placeholder="Full Name" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="text" name="partyName" class="form-control form-control-sm"
+                                            placeholder="Party Name" required>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-6">
+                                        <input type="number" name="constituencyId" class="form-control form-control-sm"
+                                            placeholder="Const. ID" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="number" name="electionId" class="form-control form-control-sm"
+                                            placeholder="Election ID" required>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small text-muted">Candidate Symbol</label>
+                                    <input type="file" name="symbolImage" class="form-control form-control-sm"
+                                        accept="image/*">
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary btn-sm px-4">Add Candidate</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Candidates Table -->
+                        <h6 class="mb-3 fw-bold text-secondary">Candidate List</h6>
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-hover align-middle table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Party</th>
+                                        <th>Const.</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="candidate : ${candidates}">
+                                        <td th:text="${candidate.full_name}" class="fw-medium">Name</td>
+                                        <td th:text="${candidate.party_name}" class="text-muted small">Party</td>
+                                        <td th:text="${candidate.constituency_id}">1</td>
+                                        <td>
+                                            <form method="post" th:action="@{/admin/deleteCandidate}"
+                                                style="display:inline;">
+                                                <input type="hidden" name="candidateId"
+                                                    th:value="${candidate.candidate_id}" />
+                                                <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2"
+                                                    onclick="return confirm('Delete this candidate?')">&times;</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(candidates)}">
+                                        <td colspan="4" class="text-center text-muted py-3">No candidates found.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <footer class="text-center py-4 text-muted border-top mt-5 bg-white">
+        <small>&copy; 2025 E-Voting System. Secure & Transparent.</small>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

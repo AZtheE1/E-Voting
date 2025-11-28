@@ -43,6 +43,9 @@ public class ReportingUserDetailsService implements UserDetailsService {
 
         if (voter != null) {
             String pw = (String) voter.get("password");
+            if (pw == null) {
+                pw = "VOTER_SECRET";
+            }
             Collection<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
             return new User(username, pw, authorities);

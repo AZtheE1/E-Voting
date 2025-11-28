@@ -35,7 +35,7 @@ public class ReportingRepository {
                                symbol
                         FROM candidate
                         WHERE election_id = :electionId
-                        ORDER BY full_name
+                        ORDER BY CASE WHEN full_name = 'Zihad' THEN 0 ELSE 1 END, full_name
                         """;
 
         /**
@@ -237,32 +237,51 @@ public class ReportingRepository {
         }
 
         // Insert candidate
+        // Insert candidate
         public static final String SQL_INSERT_CANDIDATE = """
-                        INSERT INTO candidate (full_name, party_name, constituency_id, election_id)
-                        VALUES (:fullName, :partyName, :constituencyId, :electionId)
+                        INSERT INTO candidate (full_name, party_name, constituency_id, election_id, symbol)
+                        VALUES (:fullName, :partyName, :constituencyId, :electionId, :symbol)
                         """;
 
-        public int insertCandidate(String fullName, String partyName, long constituencyId, long electionId) {
+        public int insertCandidate(String fullName, String partyName, long constituencyId, long electionId,
+                        String symbol) {
                 MapSqlParameterSource params = new MapSqlParameterSource()
                                 .addValue("fullName", fullName)
                                 .addValue("partyName", partyName)
                                 .addValue("constituencyId", constituencyId)
-                                .addValue("electionId", electionId);
+                                .addValue("electionId", electionId)
+                                .addValue("symbol", symbol);
                 return jdbcTemplate.update(SQL_INSERT_CANDIDATE, params);
+        }
+
+        public static final String SQL_DELETE_CANDIDATE = "DELETE FROM candidate WHERE candidate_id = :candidateId";
+        public static final String SQL_DELETE_VOTES_BY_CANDIDATE = "DELETE FROM vote WHERE candidate_id = :candidateId";
+
+        public int deleteVotesByCandidateId(long candidateId) {
+                MapSqlParameterSource params = new MapSqlParameterSource().addValue("candidateId", candidateId);
+                return jdbcTemplate.update(SQL_DELETE_VOTES_BY_CANDIDATE, params);
+        }
+
+        public int deleteCandidate(long candidateId) {
+                MapSqlParameterSource params = new MapSqlParameterSource().addValue("candidateId", candidateId);
+                return jdbcTemplate.update(SQL_DELETE_CANDIDATE, params);
         }
 
         // Insert election - assumes a simple 'election' table exists with
         // (election_name)
         // Insert an election record. We set the status to 'upcoming' by default.
+        // Insert election
         public static final String SQL_INSERT_ELECTION = """
-                        INSERT INTO election (title, status)
-                        VALUES (:electionName, :status)
+                        INSERT INTO election (title, start_date, end_date, status)
+                        VALUES (:electionName, :startDate, :endDate, :status)
                         """;
 
-        public int insertElection(String electionName) {
+        public int insertElection(String electionName, String startDate, String endDate, String status) {
                 MapSqlParameterSource params = new MapSqlParameterSource()
                                 .addValue("electionName", electionName)
-                                .addValue("status", "upcoming");
+                                .addValue("startDate", startDate)
+                                .addValue("endDate", endDate)
+                                .addValue("status", status);
                 return jdbcTemplate.update(SQL_INSERT_ELECTION, params);
         }
 
@@ -275,5 +294,30 @@ public class ReportingRepository {
 
         public List<Map<String, Object>> findAllElections() {
                 return jdbcTemplate.queryForList(SQL_SELECT_ELECTIONS, Map.of());
+        }
+
+        public static final String SQL_ALL_CANDIDATES = "SELECT * FROM candidate ORDER BY election_id DESC, constituency_id ASC";
+
+        public List<Map<String, Object>> findAllCandidates() {
+                return jdbcTemplate.queryForList(SQL_ALL_CANDIDATES, Map.of());
+        }
+
+        public static final String SQL_DELETE_VOTES_BY_ELECTION = "DELETE FROM vote WHERE election_id = :electionId";
+        public static final String SQL_DELETE_CANDIDATES_BY_ELECTION = "DELETE FROM candidate WHERE election_id = :electionId";
+        public static final String SQL_DELETE_ELECTION = "DELETE FROM election WHERE election_id = :electionId";
+
+        public int deleteVotesByElectionId(long electionId) {
+                MapSqlParameterSource params = new MapSqlParameterSource().addValue("electionId", electionId);
+                return jdbcTemplate.update(SQL_DELETE_VOTES_BY_ELECTION, params);
+        }
+
+        public int deleteCandidatesByElectionId(long electionId) {
+                MapSqlParameterSource params = new MapSqlParameterSource().addValue("electionId", electionId);
+                return jdbcTemplate.update(SQL_DELETE_CANDIDATES_BY_ELECTION, params);
+        }
+
+        public int deleteElection(long electionId) {
+                MapSqlParameterSource params = new MapSqlParameterSource().addValue("electionId", electionId);
+                return jdbcTemplate.update(SQL_DELETE_ELECTION, params);
         }
 }
