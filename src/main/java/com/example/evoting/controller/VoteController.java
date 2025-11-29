@@ -31,6 +31,11 @@ public class VoteController {
             return "redirect:/login";
         }
 
+        // Prevent admin from accessing vote page
+        if ("admin".equals(principal.getName())) {
+            return "redirect:/admin";
+        }
+
         String username = principal.getName();
         Map<String, Object> voter = reportingService.findVoterByNid(username);
 

@@ -73,10 +73,15 @@ public class ReportingService {
         return repository.findVoterByIdString(idStr);
     }
 
-    public void addCandidate(String fullName, String partyName, long constituencyId, long electionId, String symbol) {
-        int rows = repository.insertCandidate(fullName, partyName, constituencyId, electionId, symbol);
+    public void addCandidate(String fullName, String partyName, long constituencyId, long electionId, byte[] symbol,
+            long voterId) {
+        int rows = repository.insertCandidate(fullName, partyName, constituencyId, electionId, symbol, voterId);
         if (rows != 1)
             throw new IllegalStateException("Failed to insert candidate");
+    }
+
+    public byte[] getCandidateSymbol(long candidateId) {
+        return repository.getCandidateSymbol(candidateId);
     }
 
     public void deleteCandidate(long candidateId) {
@@ -112,10 +117,6 @@ public class ReportingService {
             throw new IllegalStateException("Failed to insert election");
     }
 
-    /**
-     * Authenticates a voter by NID and Password, then returns their details.
-     * Also filters candidates based on the voter's constituency.
-     */
     /**
      * Finds candidates for a specific election and constituency.
      */
@@ -173,4 +174,9 @@ public class ReportingService {
         repository.deleteCandidatesByElectionId(electionId);
         repository.deleteElection(electionId);
     }
+
+    public List<Map<String, Object>> getVotesByElection(long electionId) {
+        return repository.findVotesByElection(electionId);
+    }
+
 }

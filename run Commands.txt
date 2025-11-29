@@ -1,0 +1,62 @@
+E-Voting Project - Run Commands
+================================
+
+Prerequisites:
+- Java 21 SDK installed.
+- Maven installed and configured.
+- MySQL Server running on localhost:3306.
+- Database named 'e_voting' created in MySQL.
+
+1. Run the Application (Development Mode)
+-----------------------------------------
+Use the Spring Boot Maven plugin to run the application directly from the source:
+
+    mvn spring-boot:run
+
+2. Build the Application
+------------------------
+Clean the target directory and package the application into a JAR file:
+
+    mvn clean package
+
+Or to install it to your local repository:
+
+    mvn clean install
+
+3. Run the Packaged Application
+-------------------------------
+After building, you can run the generated JAR file:
+
+    java -jar target/evoting-0.0.1-SNAPSHOT.jar
+
+4. Access the Application
+-------------------------
+Once the application is running, open your web browser and navigate to:
+
+    http://localhost:8081
+
+5. Database Configuration
+-------------------------
+Ensure your MySQL database is configured as follows (or update src/main/resources/application.properties):
+- URL: jdbc:mysql://localhost:3306/e_voting
+- Username: root
+- Password: (empty)
+
+6. Troubleshooting
+------------------
+- If port 8081 is in use, change 'server.port' in src/main/resources/application.properties.
+- If you encounter database connection errors, verify MySQL is running and the credentials match.
+
+7. Public Access / Tunneling
+----------------------------
+To expose your local server (port 8081) to the internet:
+
+Option A: localhost.run (Recommended if Serveo is down)
+    ssh -R 80:localhost:8081 localhost.run
+
+Option B: Serveo.net
+    ssh -R 80:localhost:8081 serveo.net
+
+Option C: Ngrok (Requires installation)
+    ngrok http 8081
+

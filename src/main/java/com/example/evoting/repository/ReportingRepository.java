@@ -24,21 +24,6 @@ public class ReportingRepository {
                         """;
 
         /**
-         * SQL-2: Retrieve all candidates for a specific election.
-         */
-        public static final String SQL_CANDIDATES_FOR_ELECTION = """
-                        SELECT candidate_id,
-                               full_name,
-                               party_name,
-                               constituency_id,
-                               election_id,
-                               symbol
-                        FROM candidate
-                        WHERE election_id = :electionId
-                        ORDER BY CASE WHEN full_name = 'Zihad' THEN 0 ELSE 1 END, full_name
-                        """;
-
-        /**
          * SQL-3: Count votes for each candidate in an election.
          */
         public static final String SQL_VOTES_PER_CANDIDATE = """
@@ -236,22 +221,46 @@ public class ReportingRepository {
                 return jdbcTemplate.update(SQL_INSERT_VOTER, params);
         }
 
-        // Insert candidate
+        public static final String SQL_CANDIDATES_FOR_ELECTION = """
+                        SELECT candidate_id,
+                               full_name,
+                               party_name,
+                               constituency_id,
+                               election_id
+                               -- symbol is excluded here to avoid heavy load, fetched via controller
+                        FROM candidate
+                        WHERE election_id = :electionId
+                        ORDER BY candidate_id
+                        """;
+
+        // ... (other queries)
+
         // Insert candidate
         public static final String SQL_INSERT_CANDIDATE = """
-                        INSERT INTO candidate (full_name, party_name, constituency_id, election_id, symbol)
-                        VALUES (:fullName, :partyName, :constituencyId, :electionId, :symbol)
+                        INSERT INTO candidate (full_name, party_name, constituency_id, election_id, symbol, voter_id)
+                        VALUES (:fullName, :partyName, :constituencyId, :electionId, :symbol, :voterId)
                         """;
 
         public int insertCandidate(String fullName, String partyName, long constituencyId, long electionId,
-                        String symbol) {
+                        byte[] symbol, long voterId) {
                 MapSqlParameterSource params = new MapSqlParameterSource()
                                 .addValue("fullName", fullName)
                                 .addValue("partyName", partyName)
                                 .addValue("constituencyId", constituencyId)
                                 .addValue("electionId", electionId)
-                                .addValue("symbol", symbol);
+                                .addValue("symbol", symbol) // JDBC handles byte[] as BLOB
+                                .addValue("voterId", voterId);
                 return jdbcTemplate.update(SQL_INSERT_CANDIDATE, params);
+        }
+
+        public byte[] getCandidateSymbol(long candidateId) {
+                String sql = "SELECT symbol FROM candidate WHERE candidate_id = :candidateId";
+                MapSqlParameterSource params = new MapSqlParameterSource().addValue("candidateId", candidateId);
+                try {
+                        return jdbcTemplate.queryForObject(sql, params, byte[].class);
+                } catch (Exception e) {
+                        return null;
+                }
         }
 
         public static final String SQL_DELETE_CANDIDATE = "DELETE FROM candidate WHERE candidate_id = :candidateId";
@@ -319,5 +328,23 @@ public class ReportingRepository {
         public int deleteElection(long electionId) {
                 MapSqlParameterSource params = new MapSqlParameterSource().addValue("electionId", electionId);
                 return jdbcTemplate.update(SQL_DELETE_ELECTION, params);
+        }
+
+        public static final String SQL_VOTES_BY_ELECTION = """
+                        SELECT v.vote_id,
+                               vr.full_name AS voter_name,
+                               vr.nid_number AS voter_nid,
+                               c.full_name AS candidate_name,
+                               c.party_name
+                        FROM vote v
+                        JOIN voter vr ON v.voter_id = vr.voter_id
+                        JOIN candidate c ON v.candidate_id = c.candidate_id
+                        WHERE v.election_id = :electionId
+                        ORDER BY vr.full_name
+                        """;
+
+        public List<Map<String, Object>> findVotesByElection(long electionId) {
+                return jdbcTemplate.queryForList(SQL_VOTES_BY_ELECTION,
+                                new MapSqlParameterSource("electionId", electionId));
         }
 }

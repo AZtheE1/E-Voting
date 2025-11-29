@@ -8,32 +8,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <style>
-        .result-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .progress {
-            height: 1.5rem;
-            border-radius: 0.75rem;
-            background-color: #f3f4f6;
-            margin-top: 0.5rem;
-        }
-
-        .progress-bar {
-            background-color: var(--primary-color);
-            border-radius: 0.75rem;
-            line-height: 1.5rem;
-            font-weight: 600;
-            padding-left: 0.5rem;
-            text-align: left;
-        }
-    </style>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
 
 <body>
@@ -63,37 +40,24 @@
 
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div th:each="result : ${votesPerCandidate}" class="result-card">
-                    <div class="d-flex justify-content-between align-items-end">
-                        <div>
-                            <h4 class="mb-1" th:text="${result.candidate_name}">Candidate Name</h4>
-                            <small class="text-muted" th:text="${result.party_name}">Party</small>
+                <div th:each="result : ${votesPerCandidate}" class="result-card card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-end">
+                            <div>
+                                <h4 class="mb-1" th:text="${result.candidate_name}">Candidate Name</h4>
+                                <small class="text-muted" th:text="${result.party_name}">Party</small>
+                            </div>
+                            <div class="text-end">
+                                <h3 class="mb-0 fw-bold" th:text="${result.total_votes}">0</h3>
+                                <small class="text-muted">Votes</small>
+                            </div>
                         </div>
-                        <div class="text-end">
-                            <h3 class="mb-0 fw-bold" th:text="${result.total_votes}">0</h3>
-                            <small class="text-muted">Votes</small>
-                        </div>
-                    </div>
 
-                    <!-- Calculate percentage for progress bar (mock logic for now, ideally calculated in backend) -->
-                    <div class="progress">
-                        <div class="progress-bar" role="progressbar"
-                            th:style="'width: ' + (${result.total_votes} * 10) + '%'"
-                            th:aria-valuenow="${result.total_votes}" aria-valuemin="0" aria-valuemax="100">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="text-center mt-4">
-                    <a th:href="@{/elections}" class="btn btn-outline-primary">Back to Elections</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="site-footer">
-        &copy; 2025 E-Voting System. Secure & Transparent.
-    </div>
+                        <!-- Calculate percentage for progress bar (mock logic for now, ideally calculated in backend) -->
+                        <div class="progress mt-3" style="height: 10px;">
+                            <div class="progress-bar" role="progressbar"
+                                th:style="'width: ' + (${result.total_votes} * 10) + '%'" &copy; 2025 E-Voting System.
+                                Secure & Transparent. </div>
 
 </body>
 

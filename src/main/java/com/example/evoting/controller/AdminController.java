@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.evoting.service.ReportingService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/admin")
@@ -23,11 +25,37 @@ public class AdminController {
     }
 
     @GetMapping
-    public String adminDashboard(Model model) {
+    public String adminDashboard(@RequestParam(required = false) Long electionId, Model model) {
         List<Map<String, Object>> elections = reportingService.loadElections();
-        List<Map<String, Object>> candidates = reportingService.getAllCandidates();
         model.addAttribute("elections", elections);
+
+        Map<String, Object> selectedElection = null;
+        List<Map<String, Object>> candidates = java.util.Collections.emptyList();
+        List<Map<String, Object>> votes = java.util.Collections.emptyList();
+
+        if (electionId != null) {
+            // Find the selected election from the list (avoiding extra DB call if possible,
+            // or just fetch it)
+            selectedElection = elections.stream()
+                    .filter(e -> ((Number) e.get("election_id")).longValue() == electionId)
+                    .findFirst()
+                    .orElse(null);
+
+            if (selectedElection != null) {
+                candidates = reportingService.loadCandidates(electionId);
+                votes = reportingService.getVotesByElection(electionId);
+            }
+        } else if (!elections.isEmpty()) {
+            // Optional: Default to the first election if none selected?
+            // Or just show nothing. User said "when a admin click on candidate option...
+            // all candidates on that election will shown"
+            // So initially maybe nothing is selected.
+        }
+
+        model.addAttribute("selectedElection", selectedElection);
         model.addAttribute("candidates", candidates);
+        model.addAttribute("votes", votes);
+
         return "admin";
     }
 
@@ -53,41 +81,56 @@ public class AdminController {
         return "redirect:/admin";
     }
 
+    @GetMapping("/api/voter-info")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getVoterInfo(@RequestParam String nid) {
+        Map<String, Object> voter = reportingService.findVoterByNid(nid);
+        if (voter == null) {
+            // Try by ID
+            voter = reportingService.findVoterByIdString(nid);
+        }
+        if (voter == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(voter);
+    }
+
     @PostMapping("/addCandidate")
     public String addCandidate(
             @RequestParam String fullName,
             @RequestParam String partyName,
             @RequestParam long constituencyId,
             @RequestParam long electionId,
+            @RequestParam(required = false) Long voterId,
             @RequestParam("symbolImage") org.springframework.web.multipart.MultipartFile symbolImage) {
         try {
-            String symbolPath = null;
+            byte[] symbolBytes = null;
             if (symbolImage != null && !symbolImage.isEmpty()) {
-                // Save image
-                String fileName = java.util.UUID.randomUUID().toString() + "_" + symbolImage.getOriginalFilename();
-                java.nio.file.Path uploadPath = java.nio.file.Paths.get("src/main/resources/static/images/symbols/");
-                if (!java.nio.file.Files.exists(uploadPath)) {
-                    java.nio.file.Files.createDirectories(uploadPath);
-                }
-                java.nio.file.Path filePath = uploadPath.resolve(fileName);
-                java.nio.file.Files.copy(symbolImage.getInputStream(), filePath,
-                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                symbolPath = "/images/symbols/" + fileName;
+                symbolBytes = symbolImage.getBytes();
             }
 
-            reportingService.addCandidate(fullName, partyName, constituencyId, electionId, symbolPath);
+            // If voterId is provided, use it. If not (legacy support or error), we might
+            // need to handle it.
+            // But based on new requirement, we expect voterId.
+            long vId = (voterId != null) ? voterId : 0;
+
+            reportingService.addCandidate(fullName, partyName, constituencyId, electionId, symbolBytes, vId);
         } catch (Exception e) {
             e.printStackTrace(); // Log error
         }
-        return "redirect:/admin";
+        // Redirect back to the specific election view
+        return "redirect:/admin?electionId=" + electionId;
     }
 
     @PostMapping("/deleteCandidate")
-    public String deleteCandidate(@RequestParam long candidateId) {
+    public String deleteCandidate(@RequestParam long candidateId, @RequestParam(required = false) Long electionId) {
         try {
             reportingService.deleteCandidate(candidateId);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        if (electionId != null) {
+            return "redirect:/admin?electionId=" + electionId;
         }
         return "redirect:/admin";
     }

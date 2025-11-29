@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS candidate (
     party_name VARCHAR(255) NOT NULL,
     constituency_id BIGINT,
     election_id BIGINT,
-    symbol VARCHAR(255),
+    symbol LONGBLOB,
+    voter_id BIGINT,
     FOREIGN KEY (election_id) REFERENCES election(election_id)
 );
 
