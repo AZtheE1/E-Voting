@@ -227,7 +227,6 @@ public class ReportingRepository {
                                party_name,
                                constituency_id,
                                election_id
-                               -- symbol is excluded here to avoid heavy load, fetched via controller
                         FROM candidate
                         WHERE election_id = :electionId
                         ORDER BY candidate_id

@@ -27,48 +27,63 @@ public class VoteController {
 
     @GetMapping("/vote/{electionId}")
     public String showBallot(@PathVariable long electionId, Model model, Principal principal) {
-        if (principal == null) {
-            return "redirect:/login";
+        try {
+            if (principal == null) {
+                return "redirect:/login";
+            }
+
+            // Prevent admin from accessing vote page
+            if ("admin".equals(principal.getName())) {
+                return "redirect:/admin";
+            }
+
+            String username = principal.getName();
+            Map<String, Object> voter = reportingService.findVoterByNid(username);
+
+            if (voter == null) {
+                // Try looking up by Voter ID
+                voter = reportingService.findVoterByIdString(username);
+            }
+
+            if (voter == null) {
+                return "redirect:/login?error=voter_not_found";
+            }
+
+            long voterId = ((Number) voter.get("voter_id")).longValue();
+            long constituencyId = voter.get("constituency_id") != null
+                    ? ((Number) voter.get("constituency_id")).longValue()
+                    : 0;
+
+            logger.info("Voter ID: {}, Constituency ID: {}, Election ID: {}", voterId, constituencyId, electionId);
+
+            // Check if already voted
+            if (reportingService.hasVoterVoted(electionId, voterId)) {
+                return "redirect:/results/" + electionId;
+            }
+
+            // Load candidates for voter's constituency
+            List<Map<String, Object>> candidates = reportingService.findCandidatesByElectionAndConstituency(electionId,
+                    constituencyId);
+
+            logger.info("Candidates found: {}", candidates.size());
+            for (Map<String, Object> c : candidates) {
+                logger.info("Candidate: {} (Constituency: {})", c.get("full_name"), c.get("constituency_id"));
+            }
+
+            model.addAttribute("electionId", electionId);
+            model.addAttribute("candidates", candidates);
+            model.addAttribute("voterName", voter.get("full_name"));
+            // In a real app, fetch constituency name from DB
+            model.addAttribute("constituencyName", "Constituency " + constituencyId);
+            model.addAttribute("voterId", voterId);
+
+            return "vote";
+        } catch (Exception e) {
+            logger.error("Error in showBallot", e);
+            model.addAttribute("error", "Debug Error: " + e.getMessage());
+            e.printStackTrace();
+            return "vote"; // Try to render vote page with error, or fallback
         }
-
-        // Prevent admin from accessing vote page
-        if ("admin".equals(principal.getName())) {
-            return "redirect:/admin";
-        }
-
-        String username = principal.getName();
-        Map<String, Object> voter = reportingService.findVoterByNid(username);
-
-        if (voter == null) {
-            // Try looking up by Voter ID
-            voter = reportingService.findVoterByIdString(username);
-        }
-
-        if (voter == null) {
-            return "redirect:/login?error=voter_not_found";
-        }
-
-        long voterId = ((Number) voter.get("voter_id")).longValue();
-        long constituencyId = voter.get("constituency_id") != null ? ((Number) voter.get("constituency_id")).longValue()
-                : 0;
-
-        // Check if already voted
-        if (reportingService.hasVoterVoted(electionId, voterId)) {
-            return "redirect:/results/" + electionId;
-        }
-
-        // Load candidates for voter's constituency
-        List<Map<String, Object>> candidates = reportingService.findCandidatesByElectionAndConstituency(electionId,
-                constituencyId);
-
-        model.addAttribute("electionId", electionId);
-        model.addAttribute("candidates", candidates);
-        model.addAttribute("voterName", voter.get("full_name"));
-        // In a real app, fetch constituency name from DB
-        model.addAttribute("constituencyName", "Constituency " + constituencyId);
-        model.addAttribute("voterId", voterId);
-
-        return "vote";
     }
 
     @PostMapping("/vote")

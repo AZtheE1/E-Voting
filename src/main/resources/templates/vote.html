@@ -149,8 +149,9 @@
                 <div th:each="candidate : ${candidates}" class="candidate-card"
                     th:onclick="'selectCandidate(this, ' + ${candidate.candidate_id} + ')'">
                     <!-- Use symbol if available, else placeholder -->
-                    <img th:src="${candidate.symbol != null ? candidate.symbol : 'https://placehold.co/100x100?text=Symbol'}"
-                        alt="Symbol" class="symbol-img">
+                    <img th:src="@{/candidate/image/{id}(id=${candidate.candidate_id})}"
+                        onerror="this.onerror=null;this.src='https://placehold.co/100x100?text=Symbol';" alt="Symbol"
+                        class="symbol-img">
 
                     <h3 class="candidate-name" th:text="${candidate.full_name}">Candidate Name</h3>
                     <p class="party-name" th:text="${candidate.party_name}">Party Name</p>
