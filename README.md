@@ -84,3 +84,12 @@ Before you begin, ensure you have met the following requirements:
        FOREIGN KEY (voter_id) REFERENCES voters(id),
        FOREIGN KEY (candidate_id) REFERENCES candidates(id)
    );
+
+## Author
+
+- **Name**: Abu Zihad
+- **Email**: [azihad783@gmail.com](mailto:azihad783@gmail.com)
+- **GitHub**: [AZtheE1](https://github.com/AZtheE1)
+
+---
+*This project was created and maintained with a focus on modern design, security, and clean architecture.*
