@@ -1,5 +1,6 @@
 package com.example.evoting.controller;
 
+
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -28,15 +29,7 @@ public class VoteController {
     @GetMapping("/vote/{electionId}")
     public String showBallot(@PathVariable long electionId, Model model, Principal principal) {
         try {
-            if (principal == null) {
-                return "redirect:/login";
-            }
-
-            // Prevent admin from accessing vote page
-            if ("admin".equals(principal.getName())) {
-                return "redirect:/admin";
-            }
-
+            // Spring Security ensures principal is not null for this route
             String username = principal.getName();
             Map<String, Object> voter = reportingService.findVoterByNid(username);
 

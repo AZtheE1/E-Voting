@@ -23,9 +23,6 @@ public class ResultController {
 
     @GetMapping("/results/{electionId}")
     public String viewResults(@PathVariable long electionId, Model model, Principal principal) {
-        if (principal == null) {
-            return "redirect:/login";
-        }
 
         try {
             model.addAttribute("votesPerCandidate", reportingService.loadVotesPerCandidate(electionId));

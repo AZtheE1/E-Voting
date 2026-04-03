@@ -16,9 +16,6 @@ public class ReportingService {
         this.repository = repository;
     }
 
-    public List<Map<String, Object>> loadVoters() {
-        return repository.findAllVoters();
-    }
 
     public List<Map<String, Object>> loadCandidates(long electionId) {
         return repository.findCandidatesForElection(electionId);

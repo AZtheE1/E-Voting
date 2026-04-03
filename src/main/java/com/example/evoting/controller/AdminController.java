@@ -59,8 +59,7 @@ public class AdminController {
         return "admin";
     }
 
-    @RequestMapping(value = "/saveElection", method = { org.springframework.web.bind.annotation.RequestMethod.GET,
-            org.springframework.web.bind.annotation.RequestMethod.POST })
+    @PostMapping("/saveElection")
     public String saveElection(
             @RequestParam(value = "title", required = false) String title,
             @RequestParam(value = "startDate", required = false) String startDate,

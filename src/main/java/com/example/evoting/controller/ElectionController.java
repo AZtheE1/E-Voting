@@ -21,10 +21,6 @@ public class ElectionController {
 
     @GetMapping("/elections")
     public String listElections(Model model, Principal principal) {
-        if (principal == null) {
-            return "redirect:/login";
-        }
-
         // In a real app, we might filter elections by voter's eligibility
         List<Map<String, Object>> elections = reportingService.loadElections();
         model.addAttribute("elections", elections);

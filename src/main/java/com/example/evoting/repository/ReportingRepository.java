@@ -10,18 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ReportingRepository {
 
-        /**
-         * SQL-1: Retrieve all voters.
-         */
-        public static final String SQL_ALL_VOTERS = """
-                         SELECT voter_id,
-                                 full_name,
-                                 nid_number,
-                                 date_of_birth,
-                                 gender
-                         FROM voter
-                         ORDER BY full_name
-                        """;
 
         /**
          * SQL-3: Count votes for each candidate in an election.
@@ -69,9 +57,6 @@ public class ReportingRepository {
                 this.jdbcTemplate = jdbcTemplate;
         }
 
-        public List<Map<String, Object>> findAllVoters() {
-                return jdbcTemplate.queryForList(SQL_ALL_VOTERS, Map.of());
-        }
 
         public List<Map<String, Object>> findCandidatesForElection(long electionId) {
                 return jdbcTemplate.queryForList(
@@ -101,6 +86,8 @@ public class ReportingRepository {
                         SELECT v.vote_id, v.voter_id, v.candidate_id, v.election_id,
                                c.full_name AS candidate_name, c.party_name AS party_name, c.constituency_id
                         FROM vote v
+                        JOIN candidate c ON v.candidate_id = c.candidate_id
+                        WHERE v.voter_id = :voterId AND v.election_id = :electionId
                         LIMIT 1
                         """;
 
